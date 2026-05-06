@@ -1,0 +1,84 @@
+"""
+Tours API routes
+GET  /api/tours/       - list all tours
+GET  /api/tours/<id>   - tour detail with full plant steps
+POST /api/tours/       - create tour
+PUT  /api/tours/<id>   - update tour
+DELETE /api/tours/<id> - delete tour
+"""
+
+from flask import Blueprint, request, jsonify
+from app import db
+from app.models.tour import Tour
+from app.models.plant import Plant
+
+tours_bp = Blueprint("tours", __name__)
+
+
+def _ok(data, **kw):
+    return jsonify({"success": True, "data": data, **kw})
+
+
+def _err(msg, code=400):
+    return jsonify({"success": False, "error": msg}), code
+
+
+@tours_bp.route("/", methods=["GET"])
+def list_tours():
+    tours = Tour.query.order_by(Tour.id).all()
+    return _ok([t.to_dict(include_plants=False) for t in tours], total=len(tours))
+
+
+@tours_bp.route("/<int:tour_id>", methods=["GET"])
+def get_tour(tour_id):
+    tour = Tour.query.get_or_404(tour_id)
+    return _ok(tour.to_dict(include_plants=True))
+
+
+@tours_bp.route("/", methods=["POST"])
+def create_tour():
+    data = request.get_json(silent=True)
+    if not data:
+        return _err("JSON body required")
+    if not data.get("name"):
+        return _err("'name' is required")
+
+    tour = Tour(
+        name=data["name"],
+        theme=data.get("theme"),
+        emoji=data.get("emoji", "🗺️"),
+        color=data.get("color", "linear-gradient(135deg,#2d5038,#4a7c59)"),
+        desc=data.get("desc"),
+        duration=data.get("duration"),
+    )
+
+    plant_ids = data.get("plant_ids", [])
+    tour.plants = [Plant.query.get(pid) for pid in plant_ids if Plant.query.get(pid)]
+
+    db.session.add(tour)
+    db.session.commit()
+    return _ok(tour.to_dict()), 201
+
+
+@tours_bp.route("/<int:tour_id>", methods=["PUT"])
+def update_tour(tour_id):
+    tour = Tour.query.get_or_404(tour_id)
+    data = request.get_json(silent=True) or {}
+
+    for f in ["name", "theme", "emoji", "color", "desc", "duration"]:
+        if f in data:
+            setattr(tour, f, data[f])
+
+    if "plant_ids" in data:
+        tour.plants = [Plant.query.get(pid) for pid in data["plant_ids"] if Plant.query.get(pid)]
+
+    db.session.commit()
+    return _ok(tour.to_dict())
+
+
+@tours_bp.route("/<int:tour_id>", methods=["DELETE"])
+def delete_tour(tour_id):
+    tour = Tour.query.get_or_404(tour_id)
+    db.session.delete(tour)
+    db.session.commit()
+    return _ok({"deleted": tour_id})
