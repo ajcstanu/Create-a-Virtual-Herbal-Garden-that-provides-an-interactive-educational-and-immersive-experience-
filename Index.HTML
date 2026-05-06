@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vanaspati — Virtual Herbal Garden</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root {
+  --sage: #4a7c59;
+  --sage-light: #6fa67f;
+  --sage-dark: #2d5038;
+  --cream: #f5f0e8;
+  --cream-dark: #ede5d4;
+  --brown: #6b4c2a;
+  --brown-light: #9b7a52;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --text: #1e1e1e;
+  --text-muted: #5a5a5a;
+  --white: #ffffff;
+  --card-bg: rgba(255,255,255,0.85);
+  --border: rgba(74,124,89,0.2);
+  --shadow: 0 8px 32px rgba(0,0,0,0.08);
+  --shadow-lg: 0 20px 60px rgba(0,0,0,0.15);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── NAVBAR ── */
+nav {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  background: rgba(245,240,232,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  height: 64px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.nav-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem; font-weight:600;
+  color: var(--sage-dark);
+  display: flex; align-items:center; gap: 10px;
+  text-decoration: none;
+}
+.nav-logo span { font-style: italic; color: var(--gold); }
+.nav-links {
+  display: flex; gap: 2rem; list-style:none;
+}
+.nav-links a {
+  text-decoration:none;
+  font-size: 0.875rem; font-weight:400;
+  color: var(--text-muted);
+  transition: color 0.2s;
+  cursor: pointer;
+}
+.nav-links a:hover, .nav-links a.active { color: var(--sage); }
+.nav-actions { display:flex; align-items:center; gap:1rem; }
+.btn-nav {
+  padding: 8px 20px;
+  background: var(--sage);
+  color: white;
+  border: none; border-radius: 50px;
+  font-size: 0.85rem; font-weight:500;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-nav:hover { background: var(--sage-dark); transform: translateY(-1px); }
+
+/* ── PAGES ── */
+.page { display:none; }
+.page.active { display:block; }
+
+/* ── HERO ── */
+#hero {
+  min-height: 100vh;
+  padding-top: 64px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  overflow:hidden;
+}
+.hero-content {
+  padding: 6rem 4rem 4rem;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(74,124,89,0.1);
+  color: var(--sage-dark);
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-size: 0.8rem; letter-spacing:0.05em;
+  margin-bottom: 2rem;
+  width: fit-content;
+}
+.hero-badge::before { content:''; width:6px; height:6px; background:var(--sage); border-radius:50%; }
+h1.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.8rem, 4vw, 4.5rem);
+  font-weight: 300;
+  line-height: 1.1;
+  color: var(--sage-dark);
+  margin-bottom: 1.5rem;
+}
+h1.hero-title em { font-style:italic; color: var(--gold); }
+.hero-sub {
+  font-size: 1.05rem; line-height: 1.7;
+  color: var(--text-muted);
+  max-width: 480px;
+  margin-bottom: 2.5rem;
+}
+.hero-actions { display:flex; gap:1rem; align-items:center; }
+.btn-primary {
+  padding: 14px 32px;
+  background: var(--sage);
+  color: white; border:none; border-radius:50px;
+  font-size: 0.95rem; font-weight:500;
+  cursor:pointer; transition: all 0.25s;
+  text-decoration:none;
+}
+.btn-primary:hover { background:var(--sage-dark); transform:translateY(-2px); box-shadow: 0 8px 24px rgba(74,124,89,0.35); }
+.btn-secondary {
+  padding: 14px 32px;
+  background: transparent;
+  color: var(--sage-dark); border: 1.5px solid var(--sage);
+  border-radius:50px; font-size: 0.95rem; font-weight:500;
+  cursor:pointer; transition: all 0.25s;
+}
+.btn-secondary:hover { background: rgba(74,124,89,0.08); }
+.hero-stats {
+  display: flex; gap: 2.5rem; margin-top: 3rem;
+  padding-top: 2rem; border-top: 1px solid var(--border);
+}
+.stat-item { text-align:center; }
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem; font-weight:600; color:var(--sage-dark);
+  display:block;
+}
+.stat-label { font-size: 0.78rem; color:var(--text-muted); margin-top:2px; }
+
+.hero-visual {
+  position:relative;
+  background: linear-gradient(135deg, #2d5038 0%, #4a7c59 50%, #6fa67f 100%);
+  display:flex; align-items:center; justify-content:center;
+  overflow:hidden;
+}
+.hero-visual::before {
+  content:'';
+  position:absolute; inset:0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+#hero-canvas { width:100%; height:100%; }
+.hero-float-card {
+  position:absolute;
+  background: rgba(255,255,255,0.95);
+  border-radius: 16px;
+  padding: 16px 20px;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(8px);
+}
+.hero-float-card.card-1 { bottom: 15%; left: 5%; }
+.hero-float-card.card-2 { top: 20%; right: 5%; }
+.card-plant-name { font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:600; color:var(--sage-dark); }
+.card-plant-sub { font-size:0.75rem; color:var(--text-muted); }
+.card-tag { display:inline-block; background:rgba(74,124,89,0.1); color:var(--sage-dark); font-size:0.7rem; padding:3px 10px; border-radius:50px; margin-top:6px; }
+
+/* ── SECTION HEADERS ── */
+.section-header {
+  text-align:center;
+  padding: 4rem 2rem 2rem;
+}
+.section-tag {
+  display:inline-block; color:var(--sage);
+  font-size:0.8rem; letter-spacing:0.1em; text-transform:uppercase;
+  margin-bottom:0.8rem;
+}
+h2.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 3vw, 3rem);
+  font-weight:300; color:var(--sage-dark);
+  line-height: 1.2;
+}
+h2.section-title em { font-style:italic; color:var(--gold); }
+.section-desc { font-size:1rem; color:var(--text-muted); max-width:500px; margin:1rem auto 0; line-height:1.7; }
+
+/* ── GARDEN PAGE ── */
+#garden-page { padding-top: 64px; min-height:100vh; }
+.garden-controls {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 1.5rem 2rem;
+  display:flex; gap:1rem; align-items:center; flex-wrap:wrap;
+}
+.search-wrap {
+  position:relative; flex:1; min-width:260px;
+}
+.search-wrap svg {
+  position:absolute; left:14px; top:50%; transform:translateY(-50%);
+  color:var(--text-muted);
+}
+.search-input {
+  width:100%; padding: 10px 14px 10px 44px;
+  border: 1.5px solid var(--border);
+  border-radius: 50px; font-size:0.9rem;
+  background: var(--cream);
+  outline:none; transition: all 0.2s;
+  font-family: 'DM Sans', sans-serif;
+}
+.search-input:focus { border-color: var(--sage); background:white; }
+.filter-select {
+  padding: 10px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 50px;
+  background: var(--cream);
+  font-size:0.88rem; color:var(--text);
+  cursor:pointer; outline:none;
+  font-family:'DM Sans',sans-serif;
+}
+.filter-select:focus { border-color:var(--sage); }
+.filter-chips { display:flex; gap:0.5rem; flex-wrap:wrap; padding: 0.75rem 2rem; }
+.chip {
+  padding: 6px 18px;
+  border-radius: 50px;
+  border: 1.5px solid var(--border);
+  background: white; color:var(--text-muted);
+  font-size:0.82rem; cursor:pointer; transition:all 0.2s;
+}
+.chip.active, .chip:hover { background:var(--sage); color:white; border-color:var(--sage); }
+.results-info { padding: 0.75rem 2rem; font-size:0.85rem; color:var(--text-muted); }
+
+/* ── PLANT GRID ── */
+.plants-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem 2rem 3rem;
+}
+.plant-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: all 0.3s;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+}
+.plant-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--sage-light);
+}
+.plant-card-img {
+  height: 200px;
+  display: flex; align-items:center; justify-content:center;
+  font-size: 5rem;
+  position:relative; overflow:hidden;
+}
+.plant-card-body { padding: 1.25rem; }
+.plant-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem; font-weight:600; color:var(--sage-dark);
+  margin-bottom: 2px;
+}
+.plant-card-botanical { font-size:0.8rem; color:var(--text-muted); font-style:italic; margin-bottom:0.75rem; }
+.plant-card-tags { display:flex; gap:0.4rem; flex-wrap:wrap; margin-bottom:1rem; }
+.tag {
+  padding: 3px 10px; border-radius:50px;
+  font-size: 0.72rem; font-weight:500;
+}
+.tag-digest { background:#e8f4ea; color:#2d6a3f; }
+.tag-immunity { background:#fff3e0; color:#e65100; }
+.tag-skin { background:#fce4ec; color:#880e4f; }
+.tag-stress { background:#ede7f6; color:#4527a0; }
+.tag-pain { background:#e3f2fd; color:#0d47a1; }
+.tag-respiratory { background:#e0f7fa; color:#006064; }
+.tag-general { background:#f3e5f5; color:#6a1b9a; }
+.plant-card-desc { font-size:0.85rem; color:var(--text-muted); line-height:1.6; margin-bottom:1rem; }
+.plant-card-actions { display:flex; gap:0.5rem; align-items:center; }
+.btn-view {
+  flex:1; padding:9px;
+  background:var(--sage); color:white; border:none;
+  border-radius:50px; font-size:0.85rem; cursor:pointer;
+  transition: all 0.2s; font-family:'DM Sans',sans-serif;
+}
+.btn-view:hover { background:var(--sage-dark); }
+.btn-bookmark {
+  width:38px; height:38px;
+  border: 1.5px solid var(--border);
+  background:white; border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition:all 0.2s; font-size:1rem;
+}
+.btn-bookmark:hover { background:var(--cream); border-color:var(--gold); }
+.btn-bookmark.active { background:var(--gold); border-color:var(--gold); }
+
+/* ── PLANT DETAIL MODAL ── */
+.modal-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  display:none; align-items:center; justify-content:center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+.modal-overlay.open { display:flex; }
+.plant-modal {
+  background: white;
+  border-radius: 24px;
+  width: 100%; max-width: 960px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+}
+.modal-close {
+  position:absolute; top:1.25rem; right:1.25rem;
+  width:40px; height:40px; border-radius:50%;
+  background: rgba(0,0,0,0.08); border:none;
+  font-size:1.1rem; cursor:pointer;
+  display:flex; align-items:center; justify-content:center;
+  z-index:10; transition: all 0.2s;
+}
+.modal-close:hover { background: rgba(0,0,0,0.15); }
+.modal-visual {
+  background: linear-gradient(160deg, #2d5038, #4a7c59);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:3rem 2rem;
+  border-radius: 24px 0 0 24px;
+  position:relative; min-height:400px;
+}
+#modal-3d-canvas { width:280px; height:280px; }
+.modal-plant-emoji { font-size: 8rem; filter:drop-shadow(0 8px 16px rgba(0,0,0,0.3)); }
+.modal-actions-float {
+  position:absolute; bottom:1.5rem;
+  display:flex; gap:0.75rem;
+}
+.btn-icon {
+  width:40px; height:40px; border-radius:50%;
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.3);
+  color:white; font-size:1rem;
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; transition: all 0.2s;
+}
+.btn-icon:hover { background: rgba(255,255,255,0.3); }
+.modal-content { padding: 2.5rem 2rem; overflow-y:auto; }
+.modal-plant-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem; font-weight:600; color:var(--sage-dark);
+  margin-bottom: 2px;
+}
+.modal-botanical { font-style:italic; color:var(--text-muted); margin-bottom:1rem; font-size:0.9rem; }
+.modal-tags { display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.5rem; }
+.modal-section { margin-bottom:1.5rem; }
+.modal-section h4 {
+  font-size:0.78rem; letter-spacing:0.08em; text-transform:uppercase;
+  color: var(--sage); margin-bottom:0.6rem; font-weight:500;
+}
+.modal-section p { font-size:0.9rem; line-height:1.7; color:var(--text-muted); }
+.modal-section ul { padding-left:1.2rem; }
+.modal-section li { font-size:0.9rem; color:var(--text-muted); margin-bottom:4px; }
+.info-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; }
+.info-card {
+  background:var(--cream); border-radius:12px; padding:0.9rem;
+}
+.info-card-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:4px; }
+.info-card-value { font-size:0.9rem; font-weight:500; color:var(--sage-dark); }
+.modal-tabs { display:flex; gap:0; border-bottom:1px solid var(--border); margin-bottom:1.5rem; }
+.modal-tab {
+  padding: 8px 18px; cursor:pointer; font-size:0.85rem;
+  color:var(--text-muted); border-bottom:2px solid transparent;
+  transition:all 0.2s; background:none; border-top:none; border-left:none; border-right:none;
+  font-family:'DM Sans',sans-serif;
+}
+.modal-tab.active { color:var(--sage); border-bottom-color:var(--sage); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+.notes-area {
+  width:100%; height:120px;
+  border: 1.5px solid var(--border); border-radius:12px;
+  padding:12px; font-family:'DM Sans',sans-serif; font-size:0.9rem;
+  resize:vertical; color:var(--text); outline:none;
+}
+.notes-area:focus { border-color:var(--sage); }
+.btn-save-note {
+  margin-top:0.75rem; padding:9px 20px;
+  background:var(--sage); color:white; border:none;
+  border-radius:50px; font-size:0.85rem; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-save-note:hover { background:var(--sage-dark); }
+.share-btns { display:flex; gap:0.75rem; flex-wrap:wrap; margin-top:0.5rem; }
+.share-btn {
+  padding: 9px 18px; border-radius:50px;
+  font-size:0.82rem; font-weight:500;
+  cursor:pointer; border:none; transition:all 0.2s;
+  font-family:'DM Sans',sans-serif;
+}
+.share-btn.wa { background:#25d366; color:white; }
+.share-btn.tw { background:#1da1f2; color:white; }
+.share-btn.cp { background:var(--cream-dark); color:var(--text); }
+
+/* ── TOURS PAGE ── */
+#tours-page { padding-top:64px; min-height:100vh; }
+.tours-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+  padding: 2rem;
+}
+.tour-card {
+  background: white; border-radius:20px; overflow:hidden;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: all 0.3s; cursor:pointer;
+}
+.tour-card:hover { transform:translateY(-5px); box-shadow:var(--shadow-lg); }
+.tour-card-header {
+  height: 160px; display:flex; align-items:center; justify-content:center;
+  font-size:4rem; position:relative;
+}
+.tour-card-body { padding:1.5rem; }
+.tour-card-theme { font-size:0.75rem; color:var(--sage); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.4rem; }
+.tour-card-name { font-family:'Cormorant Garamond',serif; font-size:1.5rem; color:var(--sage-dark); margin-bottom:0.5rem; }
+.tour-card-desc { font-size:0.85rem; color:var(--text-muted); line-height:1.6; margin-bottom:1rem; }
+.tour-meta { display:flex; gap:1rem; font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem; }
+.btn-start-tour {
+  width:100%; padding:11px;
+  background:var(--sage); color:white; border:none;
+  border-radius:50px; font-size:0.9rem; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-start-tour:hover { background:var(--sage-dark); }
+
+/* ── VIRTUAL TOUR MODAL ── */
+.tour-modal-overlay {
+  position:fixed; inset:0; z-index:2000;
+  background: rgba(20,20,20,0.95);
+  display:none; flex-direction:column;
+}
+.tour-modal-overlay.open { display:flex; }
+.tour-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.5rem 2rem;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+  color:white;
+}
+.tour-title { font-family:'Cormorant Garamond',serif; font-size:1.4rem; }
+.tour-progress-bar {
+  height:4px; background:rgba(255,255,255,0.1);
+  margin:0;
+}
+.tour-progress-fill { height:100%; background:var(--gold); transition:width 0.5s; }
+.tour-body {
+  flex:1; display:grid; grid-template-columns:1fr 1fr;
+  overflow:hidden;
+}
+.tour-plant-visual {
+  display:flex; align-items:center; justify-content:center;
+  font-size:10rem;
+  background: linear-gradient(160deg, #1a3020, #2d5038);
+  position:relative;
+}
+.tour-step-num {
+  position:absolute; top:1.5rem; left:1.5rem;
+  font-family:'Cormorant Garamond',serif;
+  font-size:0.85rem; color:rgba(255,255,255,0.5);
+}
+.tour-plant-info {
+  padding:3rem 2.5rem;
+  overflow-y:auto; color:white;
+}
+.tour-plant-name {
+  font-family:'Cormorant Garamond',serif;
+  font-size:2.2rem; color:var(--gold-light); margin-bottom:4px;
+}
+.tour-plant-botanical { font-style:italic; color:rgba(255,255,255,0.5); margin-bottom:1.5rem; }
+.tour-plant-desc { font-size:0.95rem; line-height:1.8; color:rgba(255,255,255,0.8); margin-bottom:1.5rem; }
+.tour-plant-uses h4 { color:var(--gold-light); font-size:0.8rem; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.75rem; }
+.tour-use-pill {
+  display:inline-block; padding:6px 14px;
+  background:rgba(255,255,255,0.1); border-radius:50px;
+  font-size:0.8rem; margin:0 4px 4px 0; color:rgba(255,255,255,0.85);
+}
+.tour-nav {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:1.5rem 2rem;
+  border-top:1px solid rgba(255,255,255,0.1);
+  color:white;
+}
+.btn-tour-nav {
+  padding:10px 28px;
+  border:1.5px solid rgba(255,255,255,0.3);
+  background:transparent; color:white;
+  border-radius:50px; font-size:0.9rem; cursor:pointer;
+  font-family:'DM Sans',sans-serif; transition:all 0.2s;
+}
+.btn-tour-nav:hover { background:rgba(255,255,255,0.1); }
+.btn-tour-nav.primary { background:var(--gold); border-color:var(--gold); color:#1e1e1e; }
+.tour-dots { display:flex; gap:8px; }
+.tour-dot { width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.2); transition:all 0.3s; }
+.tour-dot.active { background:var(--gold); width:24px; border-radius:50px; }
+
+/* ── BOOKMARKS PAGE ── */
+#bookmarks-page { padding-top:64px; min-height:100vh; }
+.bookmarks-empty {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  padding:6rem 2rem; text-align:center;
+}
+.empty-icon { font-size:4rem; margin-bottom:1rem; }
+.empty-title { font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:var(--sage-dark); margin-bottom:0.5rem; }
+.empty-desc { color:var(--text-muted); max-width:400px; }
+
+/* ── AI ASSISTANT ── */
+.ai-fab {
+  position:fixed; bottom:2rem; right:2rem; z-index:1500;
+  width:56px; height:56px; border-radius:50%;
+  background:var(--sage); color:white; border:none;
+  font-size:1.4rem; cursor:pointer;
+  box-shadow: 0 4px 20px rgba(74,124,89,0.5);
+  display:flex; align-items:center; justify-content:center;
+  transition:all 0.3s;
+}
+.ai-fab:hover { transform:scale(1.1); background:var(--sage-dark); }
+.ai-panel {
+  position:fixed; bottom:calc(2rem + 72px); right:2rem; z-index:1500;
+  width:340px; background:white;
+  border-radius:20px; box-shadow:var(--shadow-lg);
+  border:1px solid var(--border);
+  display:none; flex-direction:column;
+  max-height:480px;
+}
+.ai-panel.open { display:flex; }
+.ai-panel-header {
+  padding:1rem 1.25rem;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:10px;
+}
+.ai-avatar {
+  width:32px; height:32px; border-radius:50%;
+  background:var(--sage); display:flex; align-items:center; justify-content:center;
+  color:white; font-size:0.9rem;
+}
+.ai-panel-title { font-weight:500; font-size:0.9rem; }
+.ai-panel-sub { font-size:0.75rem; color:var(--text-muted); }
+.ai-messages {
+  flex:1; overflow-y:auto; padding:1rem;
+  display:flex; flex-direction:column; gap:0.75rem;
+}
+.ai-msg {
+  max-width:85%; font-size:0.85rem; line-height:1.6;
+  padding:10px 14px; border-radius:16px;
+}
+.ai-msg.bot { background:var(--cream); align-self:flex-start; border-radius:16px 16px 16px 4px; }
+.ai-msg.user { background:var(--sage); color:white; align-self:flex-end; border-radius:16px 16px 4px 16px; }
+.ai-typing { display:flex; gap:4px; align-items:center; padding:10px 14px; }
+.ai-dot { width:6px; height:6px; border-radius:50%; background:var(--text-muted); animation:bounce 1.4s infinite; }
+.ai-dot:nth-child(2) { animation-delay:0.2s; }
+.ai-dot:nth-child(3) { animation-delay:0.4s; }
+@keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-6px)} }
+.ai-input-area {
+  padding:0.75rem 1rem;
+  border-top:1px solid var(--border);
+  display:flex; gap:0.5rem;
+}
+.ai-input {
+  flex:1; border:1.5px solid var(--border); border-radius:50px;
+  padding:8px 16px; font-size:0.85rem; outline:none;
+  font-family:'DM Sans',sans-serif;
+}
+.ai-input:focus { border-color:var(--sage); }
+.ai-send {
+  width:36px; height:36px; border-radius:50%;
+  background:var(--sage); color:white; border:none;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  font-size:0.9rem; transition:all 0.2s;
+}
+.ai-send:hover { background:var(--sage-dark); }
+
+/* ── TOAST ── */
+.toast {
+  position:fixed; bottom:6rem; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--sage-dark); color:white;
+  padding:12px 24px; border-radius:50px;
+  font-size:0.88rem; opacity:0;
+  transition:all 0.3s; z-index:3000; pointer-events:none;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+/* ── SEARCH HIGHLIGHT ── */
+.highlight { background:rgba(201,168,76,0.3); border-radius:3px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.fade-up { animation: fadeUp 0.5s ease forwards; }
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  #hero { grid-template-columns:1fr; }
+  .hero-visual { height:300px; }
+  .plant-modal { grid-template-columns:1fr; }
+  .modal-visual { border-radius:24px 24px 0 0; min-height:240px; }
+  .tour-body { grid-template-columns:1fr; }
+  .ai-panel { width:calc(100vw - 2rem); right:1rem; }
+}
+
+/* ── FEATURES SECTION ── */
+.features {
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:1.5rem; padding:2rem;
+}
+.feature-card {
+  background:white; border-radius:20px; padding:2rem 1.5rem;
+  text-align:center;
+  box-shadow:0 2px 12px rgba(0,0,0,0.05);
+  transition:all 0.3s;
+}
+.feature-card:hover { transform:translateY(-4px); box-shadow:var(--shadow); }
+.feature-icon { font-size:2.5rem; margin-bottom:1rem; }
+.feature-title { font-family:'Cormorant Garamond',serif; font-size:1.2rem; color:var(--sage-dark); margin-bottom:0.5rem; }
+.feature-desc { font-size:0.85rem; color:var(--text-muted); line-height:1.6; }
+
+/* ── LOADING ── */
+.plant-img-bg {
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:5rem;
+}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="nav-logo" onclick="showPage('home')">🌿 <span>Vanaspati</span></a>
+  <ul class="nav-links">
+    <li><a onclick="showPage('home')" id="nav-home" class="active">Home</a></li>
+    <li><a onclick="showPage('garden')" id="nav-garden">Garden</a></li>
+    <li><a onclick="showPage('tours')" id="nav-tours">Virtual Tours</a></li>
+    <li><a onclick="showPage('bookmarks')" id="nav-bookmarks">Bookmarks</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-nav" onclick="showPage('garden')">Explore Plants</button>
+  </div>
+</nav>
+
+<!-- ── HOME PAGE ── -->
+<div id="home-page" class="page active">
+  <section id="hero">
+    <div class="hero-content">
+      <div class="hero-badge">AYUSH Ministry — India</div>
+      <h1 class="hero-title">Explore the world of<br><em>Medicinal Plants</em></h1>
+      <p class="hero-sub">A comprehensive digital garden featuring 50+ Ayurvedic herbs with 3D exploration, guided tours, and AI-powered insights. Traditional wisdom, modern experience.</p>
+      <div class="hero-actions">
+        <button class="btn-primary" onclick="showPage('garden')">Start Exploring</button>
+        <button class="btn-secondary" onclick="showPage('tours')">Virtual Tours</button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item"><span class="stat-num">50+</span><div class="stat-label">Medicinal Plants</div></div>
+        <div class="stat-item"><span class="stat-num">8</span><div class="stat-label">Guided Tours</div></div>
+        <div class="stat-item"><span class="stat-num">200+</span><div class="stat-label">Medicinal Uses</div></div>
+        <div class="stat-item"><span class="stat-num">6</span><div class="stat-label">Health Categories</div></div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <canvas id="hero-canvas"></canvas>
+      <div class="hero-float-card card-1">
+        <div class="card-plant-name">🌿 Ashwagandha</div>
+        <div class="card-plant-sub">Withania somnifera</div>
+        <div class="card-tag">Stress Relief</div>
+      </div>
+      <div class="hero-float-card card-2">
+        <div class="card-plant-name">🌱 Tulsi</div>
+        <div class="card-plant-sub">Ocimum tenuiflorum</div>
+        <div class="card-tag">Immunity Booster</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-header">
+    <div class="section-tag">Why Vanaspati</div>
+    <h2 class="section-title">Everything you need to <em>understand</em> herbal plants</h2>
+    <p class="section-desc">From 3D exploration to AI-guided insights, we bring Ayurvedic knowledge to your fingertips.</p>
+  </div>
+  <div class="features">
+    <div class="feature-card"><div class="feature-icon">🔬</div><div class="feature-title">3D Plant Models</div><p class="feature-desc">Rotate, zoom, and explore photorealistic plant models from every angle.</p></div>
+    <div class="feature-card"><div class="feature-icon">🗺️</div><div class="feature-title">Virtual Tours</div><p class="feature-desc">Themed guided tours covering immunity, digestion, skin care, and more.</p></div>
+    <div class="feature-card"><div class="feature-icon">🤖</div><div class="feature-title">AI Herb Guide</div><p class="feature-desc">Chat with an AI expert who can answer any question about medicinal plants.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔖</div><div class="feature-title">Bookmarks & Notes</div><p class="feature-desc">Save your favourite plants and add personal notes for future reference.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔍</div><div class="feature-title">Smart Search</div><p class="feature-desc">Find plants by name, use, region, or health benefit in seconds.</p></div>
+    <div class="feature-card"><div class="feature-icon">📤</div><div class="feature-title">Share Knowledge</div><p class="feature-desc">Spread awareness by sharing plant information on social media.</p></div>
+  </div>
+  <div style="text-align:center;padding:3rem 2rem 5rem;">
+    <button class="btn-primary" style="font-size:1rem;padding:16px 40px" onclick="showPage('garden')">Browse the Garden →</button>
+  </div>
+</div>
+
+<!-- ── GARDEN PAGE ── -->
+<div id="garden-page" class="page">
+  <div class="garden-controls">
+    <div class="search-wrap">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="search-input" id="search-input" type="text" placeholder="Search plants by name, use, or benefit…" oninput="filterPlants()">
+    </div>
+    <select class="filter-select" id="category-filter" onchange="filterPlants()">
+      <option value="">All Categories</option>
+      <option value="digest">Digestive Health</option>
+      <option value="immunity">Immunity</option>
+      <option value="skin">Skin Care</option>
+      <option value="stress">Stress & Mind</option>
+      <option value="pain">Pain Relief</option>
+      <option value="respiratory">Respiratory</option>
+    </select>
+    <select class="filter-select" id="region-filter" onchange="filterPlants()">
+      <option value="">All Regions</option>
+      <option value="himalayan">Himalayan</option>
+      <option value="tropical">Tropical India</option>
+      <option value="deccan">Deccan Plateau</option>
+      <option value="coastal">Coastal</option>
+      <option value="pan-india">Pan-India</option>
+    </select>
+  </div>
+  <div class="filter-chips" id="filter-chips">
+    <div class="chip active" onclick="setChip(this,'')">All Plants</div>
+    <div class="chip" onclick="setChip(this,'digest')">🫁 Digestive</div>
+    <div class="chip" onclick="setChip(this,'immunity')">🛡️ Immunity</div>
+    <div class="chip" onclick="setChip(this,'skin')">✨ Skin Care</div>
+    <div class="chip" onclick="setChip(this,'stress')">🧠 Stress & Mind</div>
+    <div class="chip" onclick="setChip(this,'pain')">💪 Pain Relief</div>
+    <div class="chip" onclick="setChip(this,'respiratory')">🌬️ Respiratory</div>
+  </div>
+  <div class="results-info" id="results-info"></div>
+  <div class="plants-grid" id="plants-grid"></div>
+</div>
+
+<!-- ── TOURS PAGE ── -->
+<div id="tours-page" class="page">
+  <div class="section-header">
+    <div class="section-tag">Guided Experience</div>
+    <h2 class="section-title">Choose your <em>Virtual Tour</em></h2>
+    <p class="section-desc">Themed journeys through the world of medicinal plants, curated for your wellness needs.</p>
+  </div>
+  <div class="tours-grid" id="tours-grid"></div>
+</div>
+
+<!-- ── BOOKMARKS PAGE ── -->
+<div id="bookmarks-page" class="page">
+  <div class="section-header">
+    <div class="section-tag">Your Collection</div>
+    <h2 class="section-title">Saved <em>Plants</em></h2>
+  </div>
+  <div id="bookmarks-content" class="plants-grid"></div>
+  <div id="bookmarks-empty" class="bookmarks-empty" style="display:none">
+    <div class="empty-icon">🔖</div>
+    <div class="empty-title">No bookmarks yet</div>
+    <p class="empty-desc">Explore the garden and bookmark your favourite plants to save them here.</p>
+    <button class="btn-primary" style="margin-top:1.5rem" onclick="showPage('garden')">Explore Garden</button>
+  </div>
+</div>
+
+<!-- ── PLANT DETAIL MODAL ── -->
+<div class="modal-overlay" id="plant-modal-overlay" onclick="closeModal(event)">
+  <div class="plant-modal" id="plant-modal">
+    <button class="modal-close" onclick="closePlantModal()">✕</button>
+    <div class="modal-visual">
+      <div class="modal-plant-emoji" id="modal-emoji"></div>
+      <div class="modal-actions-float">
+        <button class="btn-icon" id="modal-bookmark-btn" onclick="toggleModalBookmark()" title="Bookmark">🔖</button>
+        <button class="btn-icon" onclick="shareModalPlant()" title="Share">📤</button>
+      </div>
+    </div>
+    <div class="modal-content">
+      <div class="modal-plant-name" id="modal-name"></div>
+      <div class="modal-botanical" id="modal-botanical"></div>
+      <div class="modal-tags" id="modal-tags"></div>
+      <div class="modal-tabs">
+        <button class="modal-tab active" onclick="switchTab(this,'tab-info')">Overview</button>
+        <button class="modal-tab" onclick="switchTab(this,'tab-uses')">Medicinal Uses</button>
+        <button class="modal-tab" onclick="switchTab(this,'tab-grow')">Cultivation</button>
+        <button class="modal-tab" onclick="switchTab(this,'tab-notes')">My Notes</button>
+        <button class="modal-tab" onclick="switchTab(this,'tab-share')">Share</button>
+      </div>
+      <div class="tab-content active" id="tab-info">
+        <div class="info-grid" id="modal-info-grid"></div>
+        <div class="modal-section" style="margin-top:1rem">
+          <h4>About</h4>
+          <p id="modal-about"></p>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-uses">
+        <div class="modal-section"><h4>Primary Medicinal Uses</h4><ul id="modal-uses-list"></ul></div>
+        <div class="modal-section"><h4>Preparation Methods</h4><p id="modal-prep"></p></div>
+        <div class="modal-section"><h4>Active Compounds</h4><p id="modal-compounds"></p></div>
+      </div>
+      <div class="tab-content" id="tab-grow">
+        <div class="modal-section"><h4>Habitat</h4><p id="modal-habitat"></p></div>
+        <div class="modal-section"><h4>Cultivation Tips</h4><ul id="modal-cultivation"></ul></div>
+      </div>
+      <div class="tab-content" id="tab-notes">
+        <div class="modal-section">
+          <h4>Your Personal Notes</h4>
+          <textarea class="notes-area" id="notes-textarea" placeholder="Add your notes about this plant..."></textarea>
+          <button class="btn-save-note" onclick="saveNote()">Save Note</button>
+        </div>
+      </div>
+      <div class="tab-content" id="tab-share">
+        <div class="modal-section">
+          <h4>Share this plant</h4>
+          <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem">Spread awareness about traditional medicinal plants.</p>
+          <div class="share-btns">
+            <button class="share-btn wa" onclick="shareWA()">📱 WhatsApp</button>
+            <button class="share-btn tw" onclick="shareTW()">🐦 Twitter</button>
+            <button class="share-btn cp" onclick="copyLink()">📋 Copy Link</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── VIRTUAL TOUR MODAL ── -->
+<div class="tour-modal-overlay" id="tour-modal">
+  <div class="tour-header">
+    <div>
+      <div style="font-size:0.78rem;color:rgba(255,255,255,0.5);margin-bottom:2px" id="tour-theme-label"></div>
+      <div class="tour-title" id="tour-title-label"></div>
+    </div>
+    <button class="btn-tour-nav" onclick="closeTour()">✕ Exit Tour</button>
+  </div>
+  <div class="tour-progress-bar"><div class="tour-progress-fill" id="tour-progress"></div></div>
+  <div class="tour-body">
+    <div class="tour-plant-visual">
+      <div class="tour-step-num" id="tour-step-num"></div>
+      <div id="tour-plant-emoji" style="font-size:10rem;filter:drop-shadow(0 8px 32px rgba(0,0,0,0.4))"></div>
+    </div>
+    <div class="tour-plant-info">
+      <div class="tour-plant-name" id="tour-plant-name"></div>
+      <div class="tour-plant-botanical" id="tour-plant-botanical"></div>
+      <div class="tour-plant-desc" id="tour-plant-desc"></div>
+      <div class="tour-plant-uses">
+        <h4>Key Benefits</h4>
+        <div id="tour-uses-pills"></div>
+      </div>
+    </div>
+  </div>
+  <div class="tour-nav">
+    <button class="btn-tour-nav" onclick="tourNav(-1)">← Previous</button>
+    <div class="tour-dots" id="tour-dots"></div>
+    <button class="btn-tour-nav primary" onclick="tourNav(1)" id="tour-next-btn">Next →</button>
+  </div>
+</div>
+
+<!-- ── AI ASSISTANT ── -->
+<button class="ai-fab" onclick="toggleAI()" title="Ask AI Herb Guide">🌿</button>
+<div class="ai-panel" id="ai-panel">
+  <div class="ai-panel-header">
+    <div class="ai-avatar">🌿</div>
+    <div>
+      <div class="ai-panel-title">Vanaspati AI</div>
+      <div class="ai-panel-sub">Ask me anything about medicinal plants</div>
+    </div>
+  </div>
+  <div class="ai-messages" id="ai-messages">
+    <div class="ai-msg bot">Namaste! 🙏 I'm your AI herb guide. Ask me about any medicinal plant — its uses, benefits, preparation, or AYUSH traditions!</div>
+  </div>
+  <div class="ai-input-area">
+    <input class="ai-input" id="ai-input" placeholder="Ask about any plant…" onkeydown="if(event.key==='Enter')sendAI()">
+    <button class="ai-send" onclick="sendAI()">→</button>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+//  PLANT DATABASE
+// ══════════════════════════════════════════════
+const PLANTS = [
+  {
+    id:1, name:"Ashwagandha", emoji:"🌿",
+    botanical:"Withania somnifera",
+    common:["Indian Ginseng","Winter Cherry","Asgand"],
+    categories:["stress","immunity"],
+    region:"himalayan",
+    color:"#e8f5e9",
+    desc:"A powerful adaptogenic herb used for over 3000 years in Ayurvedic medicine to combat stress and boost vitality.",
+    about:"Ashwagandha is one of the most important herbs in Ayurveda. Its name in Sanskrit means 'smell of horse', referring to both its unique smell and its ability to increase strength. It is classified as a Rasayana (rejuvenation) herb.",
+    uses:["Reduces cortisol levels and stress","Boosts testosterone and fertility in men","Increases muscle mass and strength","Improves brain function and memory","Reduces inflammation","Helps with anxiety and depression"],
+    prep:"Consumed as powder (churna) mixed with warm milk, as capsules, or as a decoction. Common dose: 300–600mg of root extract daily.",
+    compounds:"Withanolides (principal active compounds), Withaferins, Alkaloids (isopelletierine, anaferine), Saponins, Iron",
+    habitat:"Dry regions of India, North Africa, and Mediterranean. Grows in arid and semi-arid conditions at altitudes up to 1500m.",
+    cultivation:["Plant in well-drained sandy-loam soil","Requires full sunlight, drought-tolerant","Sow seeds in late spring or early summer","Space plants 60–90cm apart","Harvest roots after 150–180 days"],
+    family:"Solanaceae", ayurvedicSystem:"Rasayana", taste:"Bitter, Astringent, Sweet",
+    part:"Root, Leaves, Seeds", season:"Perennial"
+  },
+  {
+    id:2, name:"Tulsi", emoji:"🌱",
+    botanical:"Ocimum tenuiflorum",
+    common:["Holy Basil","Sacred Basil","Vrinda"],
+    categories:["immunity","respiratory","stress"],
+    region:"pan-india",
+    color:"#f1f8e9",
+    desc:"The sacred 'Queen of Herbs' — revered in every Indian household for its remarkable healing and spiritual properties.",
+    about:"Tulsi holds a special place in Hindu culture and is worshipped as a sacred plant. Ayurvedically, it is classified as a Rasayana and is known for promoting longevity, enhancing intelligence, and fighting infections.",
+    uses:["Boosts immunity against viral infections","Relieves respiratory disorders and cough","Reduces fever and inflammation","Acts as a natural adaptogen","Purifies blood and detoxifies body","Promotes mental clarity and reduces stress"],
+    prep:"Fresh leaves consumed directly, brewed as tea (Tulsi chai), decoction with ginger and honey, essential oil for aromatherapy.",
+    compounds:"Eugenol, Ursolic acid, Rosmarinic acid, Apigenin, Linalool, β-caryophyllene, Vitamin C, Vitamin A",
+    habitat:"Tropical and subtropical regions of India. Cultivated throughout the Indian subcontinent. Thrives in warm, humid conditions.",
+    cultivation:["Grows in tropical and subtropical climates","Well-drained fertile soil with pH 6–7.5","Full sun to partial shade","Water regularly but avoid waterlogging","Harvest leaves before flowering for best potency"],
+    family:"Lamiaceae", ayurvedicSystem:"Tridoshahara", taste:"Pungent, Bitter",
+    part:"Leaves, Seeds, Root", season:"Perennial"
+  },
+  {
+    id:3, name:"Neem", emoji:"🌳",
+    botanical:"Azadirachta indica",
+    common:["Indian Lilac","Nimba","Margosa"],
+    categories:["skin","immunity"],
+    region:"pan-india",
+    color:"#e8f5e9",
+    desc:"A versatile healing tree — every part from leaf to bark offers medicinal benefits. Called 'Village Pharmacy' of India.",
+    about:"Neem has been used in Ayurvedic medicine for more than 4000 years. The Sanskrit name Nimba is derived from the term 'Nimbati Syasthyamdadati' meaning 'to give good health'. It has potent antimicrobial, antifungal, and antiviral properties.",
+    uses:["Treats skin diseases including eczema and psoriasis","Powerful antifungal and antibacterial agent","Dental hygiene and gum disease prevention","Blood sugar regulation in diabetes","Treats intestinal worms","Natural pesticide and insect repellent"],
+    prep:"Leaves boiled as decoction, bark as kadha, oil extracted from seeds, leaves used in bath water, twigs as toothbrush.",
+    compounds:"Azadirachtin, Nimbidin, Nimbin, Nimbidol, Gedunin, Salannin, Quercetin, β-sitosterol",
+    habitat:"Tropical and semi-arid regions, particularly the Indian subcontinent. Extremely hardy, drought-resistant tree growing up to 20m.",
+    cultivation:["Extremely hardy, grows in poor soils","Full sunlight required","Drought and heat tolerant","Can grow in elevations up to 700m","Propagated by seeds; germinates in 1–3 weeks"],
+    family:"Meliaceae", ayurvedicSystem:"Pitta-Kapha pacifier", taste:"Bitter",
+    part:"Leaves, Bark, Seed Oil, Flowers, Fruit", season:"Perennial"
+  },
+  {
+    id:4, name:"Turmeric", emoji:"🟡",
+    botanical:"Curcuma longa",
+    common:["Haldi","Haridra","Indian Saffron"],
+    categories:["pain","immunity","skin"],
+    region:"tropical",
+    color:"#fff9c4",
+    desc:"The 'Golden Goddess' of Ayurveda — curcumin in turmeric is one of the most studied natural anti-inflammatory compounds.",
+    about:"Turmeric has been used in India for thousands of years as a spice and medicinal herb. Modern science has confirmed many traditional uses. It is central to Ayurvedic practice as both food and medicine.",
+    uses:["Potent anti-inflammatory effects","Powerful antioxidant that neutralises free radicals","Improves brain function and prevents brain disease","Reduces risk of heart disease","May help prevent cancer","Helps with arthritis and joint pain"],
+    prep:"Golden milk (haldi doodh), added to food, turmeric paste for topical application, capsule supplements, decoction.",
+    compounds:"Curcumin (main compound), Bisdemethoxycurcumin, Demethoxycurcumin, Turmerone, Zingiberene",
+    habitat:"Tropical South and Southeast Asia, particularly India. Requires warm, humid conditions and rich, well-drained soils.",
+    cultivation:["Grows in tropical climates with 1500mm+ rainfall","Rich loamy soil, pH 5.5–7","Plant rhizomes in spring","Harvest in winter after 7–9 months","Partial shade increases quality"],
+    family:"Zingiberaceae", ayurvedicSystem:"Tridosha balancer", taste:"Bitter, Pungent",
+    part:"Rhizome (root)", season:"Annual"
+  },
+  {
+    id:5, name:"Brahmi", emoji:"🍃",
+    botanical:"Bacopa monnieri",
+    common:["Water Hyssop","Herb of Grace","Jal-Brahmi"],
+    categories:["stress"],
+    region:"pan-india",
+    color:"#e3f2fd",
+    desc:"The ancient brain tonic — revered in Ayurveda for enhancing memory, intelligence, and treating neurological conditions.",
+    about:"Brahmi has been used in Ayurvedic medicine for centuries to enhance cognitive function. It is named after Brahma, the creator God, and is considered a Medhya Rasayana (brain rejuvenator). Clinical studies support its nootropic effects.",
+    uses:["Enhances memory, learning and cognitive function","Reduces anxiety and stress","Helps with ADHD","Neuroprotective effects","Reduces inflammation in the nervous system","Helps with epilepsy"],
+    prep:"Brahmi ghee, powder mixed with honey, Brahmi tea, oil for scalp massage to improve memory.",
+    compounds:"Bacosides A and B, Bacopasides, Alkaloids (brahmine, herpestine), Flavonoids, Phenylethanoid glycosides",
+    habitat:"Wetlands, marshy areas throughout India. A creeping herb found in ponds, streams, and waterlogged areas up to 1400m altitude.",
+    cultivation:["Semi-aquatic, grows in moist/wet conditions","Full sun to partial shade","Sandy loam or clay soils","Plant near water bodies or in moist beds","Propagated by stem cuttings"],
+    family:"Plantaginaceae", ayurvedicSystem:"Medhya Rasayana", taste:"Bitter, Sweet",
+    part:"Whole plant, Leaves", season:"Perennial"
+  },
+  {
+    id:6, name:"Amla", emoji:"🍈",
+    botanical:"Phyllanthus emblica",
+    common:["Indian Gooseberry","Amalaki","Emblic Myrobalan"],
+    categories:["immunity","skin","digest"],
+    region:"pan-india",
+    color:"#f9fbe7",
+    desc:"The richest natural source of Vitamin C — a cornerstone of Ayurvedic medicine and Chyavanprash preparations.",
+    about:"Amla is one of the most important plants in Ayurveda, forming the base of the famous Triphala formulation. It is a potent Rasayana known for promoting longevity, enhancing intelligence, and strengthening immunity. One amla contains as much Vitamin C as 20 oranges.",
+    uses:["Richest source of natural Vitamin C","Boosts immune system","Anti-aging and skin health properties","Improves digestion and treats constipation","Promotes hair growth and prevents greyness","Enhances liver function"],
+    prep:"Raw fruit eaten, juice extracted, amla powder (churna), murabba (preserved in sugar), Chyavanprash, amla oil for hair.",
+    compounds:"Vitamin C (ascorbic acid), Ellagic acid, Gallic acid, Emblicanin A and B, Punigluconin, Quercetin",
+    habitat:"Tropical and subtropical regions of the Indian subcontinent. Deciduous forests and dry hills up to 1500m elevation.",
+    cultivation:["Tropical and subtropical climate","Deep, well-drained loamy soil","Drought-tolerant once established","Plant at 5–7m spacing","Fruiting starts in 3–4 years"],
+    family:"Phyllanthaceae", ayurvedicSystem:"Tridosha balancer", taste:"All 5 tastes (Panchaswad)",
+    part:"Fruit, Leaves, Bark, Root", season:"Seasonal (winter)"
+  },
+  {
+    id:7, name:"Giloy", emoji:"🌾",
+    botanical:"Tinospora cordifolia",
+    common:["Guduchi","Heart-leaved Moonseed","Amrita"],
+    categories:["immunity","digest"],
+    region:"tropical",
+    color:"#e8f5e9",
+    desc:"Known as 'Amrita' (divine nectar), this climbing shrub is one of Ayurveda's most celebrated immunity-boosting herbs.",
+    about:"Giloy is revered in Ayurveda as one of the three Amrita plants (with Tulsi and Neem). Its name Amrita means 'root of immortality'. Modern research confirms its immunomodulatory, anti-inflammatory, and antipyretic properties.",
+    uses:["Powerful immune system booster","Reduces chronic fever","Anti-diabetic properties","Improves digestion and gut health","Reduces stress and anxiety","Protects against respiratory infections"],
+    prep:"Giloy kadha (decoction), Giloy juice, Giloy satva (starch), Giloy churna, Giloy tablets or capsules.",
+    compounds:"Tinosporin, Palmatine, Berberine, Tembetarine, Magnoflorine, Tinosporidine, Cordifolide",
+    habitat:"Tropical regions of India, Sri Lanka, Myanmar. A deciduous climbing shrub growing on trees, walls and fences.",
+    cultivation:["Tropical and subtropical climate","Any well-drained soil type","Full to partial sun","Propagated by stem cuttings","Fast-growing, can become invasive"],
+    family:"Menispermaceae", ayurvedicSystem:"Tridosha balancer", taste:"Bitter, Astringent",
+    part:"Stem, Leaves, Root", season:"Perennial"
+  },
+  {
+    id:8, name:"Shatavari", emoji:"🌿",
+    botanical:"Asparagus racemosus",
+    common:["Wild Asparagus","Satavar","Shatamull"],
+    categories:["stress","immunity"],
+    region:"himalayan",
+    color:"#fce4ec",
+    desc:"The primary Ayurvedic herb for women's health, supporting hormonal balance, fertility, and reproductive wellness.",
+    about:"The name Shatavari means 'she who possesses a hundred husbands', indicating its ability to increase fertility and vitality. It is classified as a Rasayana and is particularly beneficial for women's reproductive health at all life stages.",
+    uses:["Supports female reproductive health","Acts as phytoestrogen for hormonal balance","Boosts milk production in nursing mothers","Adaptogen for stress management","Improves digestive health","Enhances immune function"],
+    prep:"Shatavari churna with warm milk, Shatavari ghee, juice of fresh roots, Shatavari kalpa (ayurvedic formulation).",
+    compounds:"Steroidal saponins (Shatavaroside A & B), Shatavarins I–IV, Racemosol, Asparagine, Sarsasapogenin",
+    habitat:"Tropical and subtropical India, Sri Lanka, and Himalayas up to 1400m. Grows in rocky soils and forest edges.",
+    cultivation:["Tropical humid climate","Well-drained loamy or sandy soil","Partial shade preferred","Support trellis needed for climbing","Propagated by seeds or root division"],
+    family:"Asparagaceae", ayurvedicSystem:"Vata-Pitta pacifier", taste:"Sweet, Bitter",
+    part:"Root, Leaves", season:"Perennial"
+  },
+  {
+    id:9, name:"Triphala", emoji:"🍇",
+    botanical:"Terminalia chebula + T. bellirica + P. emblica",
+    common:["Three Fruits Formula","Haritaki-Bibhitaki-Amla"],
+    categories:["digest","immunity"],
+    region:"pan-india",
+    color:"#ede7f6",
+    desc:"The quintessential Ayurvedic formula — a synergistic blend of three fruits that supports digestion and overall wellness.",
+    about:"Triphala is considered the cornerstone formulation of Ayurveda. Composed of three fruits — Haritaki, Bibhitaki, and Amalaki — each targeting a specific dosha, Triphala is a complete health tonic used for over 1000 years.",
+    uses:["Comprehensive digestive tonic","Natural colon cleanser and laxative","Rich source of antioxidants","Supports eye health","Anti-inflammatory properties","Prebiotic effect supporting gut microbiome"],
+    prep:"Triphala churna at bedtime with warm water, tablets, Triphala ghee, eye wash with diluted Triphala water.",
+    compounds:"Chebulic acid, Gallic acid, Ellagic acid, Chebulinic acid, Emblicanin A & B, Belleric acid, Resveratrol",
+    habitat:"Combination formula — constituent plants grow across tropical and subtropical India and into Southeast Asia.",
+    cultivation:["Three separate plants (Haritaki, Bibhitaki, Amla)","Each has distinct cultivation requirements","All are deciduous trees","Commercially available as prepared formulation"],
+    family:"Multiple families", ayurvedicSystem:"Tridosha balancer", taste:"All six tastes",
+    part:"Fruits of three trees", season:"Seasonal"
+  },
+  {
+    id:10, name:"Moringa", emoji:"🌿",
+    botanical:"Moringa oleifera",
+    common:["Drumstick Tree","Sahjan","Miracle Tree"],
+    categories:["immunity","skin","digest"],
+    region:"tropical",
+    color:"#f1f8e9",
+    desc:"Called the 'Miracle Tree' — gram for gram, it has more nutrition than most superfoods combined.",
+    about:"Every part of Moringa is nutritious and medicinal. Leaves contain 7x more vitamin C than oranges, 4x more calcium than milk, and 4x more potassium than bananas. It has been used as medicine and food for over 4000 years.",
+    uses:["Exceptional nutritional supplement","Anti-inflammatory and antioxidant","Blood sugar management","Lowers cholesterol","Antimicrobial properties","Promotes wound healing"],
+    prep:"Leaves dried and powdered, fresh leaves in cooking, seed oil (Ben oil), moringa tea, leaf capsules.",
+    compounds:"Moringin, Isothiocyanates, Quercetin, Chlorogenic acid, Vitamins A, C, E, Calcium, Iron, Potassium",
+    habitat:"Sub-Himalayan tracts of North India, tropical and subtropical regions worldwide. Drought tolerant, grows in poor soils.",
+    cultivation:["Tropical climate","Any well-drained soil","Full sunlight","Propagated by seeds or stem cuttings","Fast-growing; harvest in 6–8 months"],
+    family:"Moringaceae", ayurvedicSystem:"Tridosha balancer", taste:"Pungent, Bitter",
+    part:"Leaves, Pods, Flowers, Seeds, Bark, Roots", season:"Perennial"
+  },
+  {
+    id:11, name:"Mulethi", emoji:"🌵",
+    botanical:"Glycyrrhiza glabra",
+    common:["Liquorice Root","Yashtimadhu","Licorice"],
+    categories:["respiratory","digest","pain"],
+    region:"himalayan",
+    color:"#fff3e0",
+    desc:"Sweet yet medicinal — liquorice root soothes the respiratory tract and is 50 times sweeter than sugar.",
+    about:"Mulethi has been used in Ayurveda for over 5000 years. Its name Yashtimadhu means 'sweet stick'. It is considered a supreme Rasayana herb and is especially valued for its soothing effects on mucous membranes.",
+    uses:["Treats cough, cold and sore throat","Soothes gastric ulcers","Anti-inflammatory effects","Supports adrenal gland function","Antiviral and antimicrobial","Liver protective effects"],
+    prep:"Mulethi powder with honey, decoction, mulethi tea, mulethi stick chewed directly, used in herbal formulations.",
+    compounds:"Glycyrrhizin (50× sweeter than sugar), Glabridin, Liquiritin, Isoliquiritin, Formononetin, Phytosterols",
+    habitat:"Southern Europe and Asia, particularly Afghanistan, Iran, and Northern India. Grows in dry temperate regions.",
+    cultivation:["Temperate climate with dry summers","Deep sandy-loam soil","Full sunlight","Propagated by root sections","Harvest roots in autumn after 2–3 years"],
+    family:"Fabaceae", ayurvedicSystem:"Vata-Pitta pacifier", taste:"Sweet",
+    part:"Root, Rhizome", season:"Perennial"
+  },
+  {
+    id:12, name:"Arjuna", emoji:"🌲",
+    botanical:"Terminalia arjuna",
+    common:["Arjun Tree","Kakubha","White Marudah"],
+    categories:["pain","immunity"],
+    region:"deccan",
+    color:"#e3f2fd",
+    desc:"Named after the legendary warrior Arjuna, this tree has been the primary Ayurvedic herb for heart health for millennia.",
+    about:"Arjuna is considered the most important heart tonic in Ayurveda. Its bark has been used for over 3000 years to treat heart disease. Modern cardiology has validated its use in managing angina, heart failure, and cholesterol.",
+    uses:["Strengthens cardiac muscles","Reduces chest pain (angina)","Lowers LDL cholesterol","Anti-hypertensive effects","Antioxidant protection for heart","Helps in heart failure recovery"],
+    prep:"Arjuna bark decoction (Arjunarishta), Arjuna powder with warm milk, Arjuna tea, Arjuna ghee.",
+    compounds:"Arjunic acid, Arjunolic acid, Terminic acid, Arjunetin, Arjunoside, Flavonoids, Glycosides, Calcium, Magnesium",
+    habitat:"Riverbanks and moist deciduous forests throughout India, particularly the Deccan plateau and Himalayan foothills.",
+    cultivation:["Tropical to subtropical climate","Moist well-drained fertile soil","Full sunlight","Large tree needing space","Propagated by seeds; slow growing"],
+    family:"Combretaceae", ayurvedicSystem:"Kapha-Pitta pacifier", taste:"Astringent",
+    part:"Bark", season:"Perennial"
+  },
+  {
+    id:13, name:"Manjistha", emoji:"🌺",
+    botanical:"Rubia cordifolia",
+    common:["Indian Madder","Manjit","Samarabandha"],
+    categories:["skin","immunity"],
+    region:"himalayan",
+    color:"#fce4ec",
+    desc:"The premier Ayurvedic blood-purifying herb, renowned for its exceptional skin-brightening and detoxifying properties.",
+    about:"Manjistha is considered the best herb for purifying and moving the blood in Ayurveda. Its red roots and berries have been used as a natural dye for millennia. It is particularly valued for treating skin diseases and lymph-related disorders.",
+    uses:["Powerful blood purifier","Treats skin disorders including acne and eczema","Brightens complexion","Anti-cancer potential","Lymph system cleanser","Anti-inflammatory for joint pain"],
+    prep:"Manjistha powder with honey, decoction, as an ingredient in skin-care preparations, Manjistha tea.",
+    compounds:"Purpurin, Munjistin, Pseudopurpurin, Rubiadin, Xanthopurpurin, Mollugin, Furomollugin",
+    habitat:"Tropical Himalayas, sub-Himalayan tracts, India, Nepal, China, and Japan. Climbs on trees in moist forests.",
+    cultivation:["Temperate Himalayan climate","Moist, well-drained loamy soil","Partial shade","Climbing vine needing support","Propagated by seeds or root cuttings"],
+    family:"Rubiaceae", ayurvedicSystem:"Kapha-Pitta pacifier", taste:"Bitter, Sweet, Astringent",
+    part:"Root, Leaves, Stem", season:"Perennial"
+  },
+  {
+    id:14, name:"Peppermint", emoji:"🌿",
+    botanical:"Mentha × piperita",
+    common:["Pudina","Spearmint hybrid","Peppermint"],
+    categories:["digest","pain","respiratory"],
+    region:"pan-india",
+    color:"#e0f7fa",
+    desc:"The world's most refreshing herb — menthol in peppermint provides cooling relief for headaches, nausea, and digestion.",
+    about:"Peppermint is a hybrid of watermint and spearmint, cultivated for millennia. Its menthol content makes it one of the most recognisable and widely used medicinal plants globally. India is a major producer of peppermint oil.",
+    uses:["Relieves irritable bowel syndrome","Reduces nausea and motion sickness","Treats tension headaches (topically)","Clears nasal passages","Antimicrobial and antibacterial","Enhances exercise performance"],
+    prep:"Peppermint tea, peppermint oil for topical application, added to food, inhaled as steam, peppermint capsules for IBS.",
+    compounds:"Menthol (35–55%), Menthone, Menthyl acetate, Menthofuran, 1,8-Cineole, Limonene, β-Pinene",
+    habitat:"Cultivated worldwide, primarily Europe, North America, and India (particularly Uttar Pradesh). Prefers moist soils near streams.",
+    cultivation:["Cool, moist climate","Rich moist soil with good drainage","Partial shade to full sun","Propagated by runners/cuttings","Can become invasive; contain in pots"],
+    family:"Lamiaceae", ayurvedicSystem:"Vata-Kapha pacifier", taste:"Pungent",
+    part:"Leaves, Aerial parts, Essential oil", season:"Perennial"
+  },
+  {
+    id:15, name:"Shankhpushpi", emoji:"🌸",
+    botanical:"Convolvulus pluricaulis",
+    common:["Morning Glory","Aloe weed","Shankhahva"],
+    categories:["stress"],
+    region:"pan-india",
+    color:"#ede7f6",
+    desc:"The 'brain herb' — a classical Medhya Rasayana used to sharpen memory, intelligence, and treat neurological disorders.",
+    about:"Shankhpushpi is one of the four great Medhya (brain) Rasayanas in Ayurveda. The name comes from 'Shankha' (conch) referring to the conch-shaped flowers. It is used to enhance intellect, concentration, and mental calm.",
+    uses:["Memory enhancer and cognitive booster","Reduces anxiety and insomnia","Treats hypertension","Anti-epileptic properties","Improves thyroid function","Neuroprotective effects"],
+    prep:"Shankhpushpi syrup, powder with milk, combined with Brahmi and Ashwagandha in formulations, fresh juice.",
+    compounds:"Scopoletin, Scopolin, β-Sitosterol, Kaempferol, Shankhpushpine alkaloid, Convolvine, Glucose",
+    habitat:"Throughout India in sandy or gravelly soils. Commonly found along roadsides, fields, and waste places.",
+    cultivation:["Tropical and subtropical climate","Sandy, well-drained soil","Full sun exposure","Drought tolerant","Propagated by seeds in spring"],
+    family:"Convolvulaceae", ayurvedicSystem:"Medhya Rasayana", taste:"Bitter, Astringent, Sweet",
+    part:"Whole plant", season:"Annual"
+  },
+  {
+    id:16, name:"Karela", emoji:"🟢",
+    botanical:"Momordica charantia",
+    common:["Bitter Gourd","Bitter Melon","Pavakkai"],
+    categories:["digest","immunity"],
+    region:"tropical",
+    color:"#e8f5e9",
+    desc:"The natural insulin — bitter gourd's hypoglycaemic properties make it invaluable for diabetes management in Ayurveda.",
+    about:"Bitter gourd has been used in Ayurveda and traditional medicines across Asia for centuries. Despite its bitter taste, it is one of the most important anti-diabetic plants known to science and is validated by numerous clinical studies.",
+    uses:["Lowers blood glucose levels","Insulin-mimicking compounds","Anti-diabetic management","Boosts immunity","Purifies blood","Treats skin infections"],
+    prep:"Fresh juice on empty stomach, stir-fried vegetables, Karela powder, dried and powdered seeds, pickle.",
+    compounds:"Charantin, Vicine, Polypeptide-p (plant insulin), Momordicin, Cucurbitacin B, Lutein, β-Carotene",
+    habitat:"Tropical and subtropical regions of Asia, Africa, and the Caribbean. Cultivated as a vegetable crop throughout India.",
+    cultivation:["Hot and humid tropical climate","Rich, well-drained soil","Full sunlight","Trellis support needed","Harvest in 55–65 days"],
+    family:"Cucurbitaceae", ayurvedicSystem:"Kapha-Pitta pacifier", taste:"Bitter",
+    part:"Fruit, Leaves, Seeds", season:"Annual"
+  }
+];
+
+// ══════════════════════════════════════════════
+//  VIRTUAL TOURS DATA
+// ══════════════════════════════════════════════
+const TOURS = [
+  {
+    id:1, name:"Immunity Warriors",
+    theme:"Immune System", emoji:"🛡️",
+    color:"linear-gradient(135deg,#1a5276,#2e86c1)",
+    desc:"Discover the powerful plants that strengthen your body's natural defences and help fight infections.",
+    duration:"15 min", plants:4,
+    steps:[2,7,1,6].map(id => PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:2, name:"Digestive Harmony",
+    theme:"Digestive Health", emoji:"🫁",
+    color:"linear-gradient(135deg,#145a32,#1e8449)",
+    desc:"Explore herbs that soothe digestion, heal the gut, and restore balance to your digestive system.",
+    duration:"12 min", plants:4,
+    steps:[9,4,14,16].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:3, name:"Mind & Soul",
+    theme:"Mental Wellness", emoji:"🧠",
+    color:"linear-gradient(135deg,#4a235a,#7d3c98)",
+    desc:"Journey through herbs known to calm the mind, sharpen memory, and bring inner peace.",
+    duration:"18 min", plants:4,
+    steps:[5,1,15,2].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:4, name:"Skin Radiance",
+    theme:"Skin Care & Beauty", emoji:"✨",
+    color:"linear-gradient(135deg,#6e2c00,#c0392b)",
+    desc:"Uncover Ayurvedic secrets for glowing skin, treating skin disorders, and natural beauty.",
+    duration:"14 min", plants:4,
+    steps:[13,3,4,10].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:5, name:"Breath of Life",
+    theme:"Respiratory Health", emoji:"🌬️",
+    color:"linear-gradient(135deg,#1a3a4a,#117a8b)",
+    desc:"Learn about plants that open airways, treat cough and cold, and support respiratory wellness.",
+    duration:"10 min", plants:3,
+    steps:[2,11,14].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:6, name:"Women's Wellness",
+    theme:"Female Health", emoji:"🌸",
+    color:"linear-gradient(135deg,#6b0d3a,#c0392b)",
+    desc:"Explore plants traditionally used for women's reproductive health, hormonal balance, and vitality.",
+    duration:"12 min", plants:3,
+    steps:[8,6,13].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:7, name:"Heart & Circulation",
+    theme:"Cardiovascular Health", emoji:"❤️",
+    color:"linear-gradient(135deg,#7b241c,#e74c3c)",
+    desc:"Discover the powerful herbs that protect the heart, manage cholesterol, and improve circulation.",
+    duration:"14 min", plants:3,
+    steps:[12,4,11].map(id=>PLANTS.find(p=>p.id===id))
+  },
+  {
+    id:8, name:"Himalayan Treasures",
+    theme:"Mountain Herbs", emoji:"🏔️",
+    color:"linear-gradient(135deg,#1c2833,#2e4057)",
+    desc:"Journey to the high Himalayas and discover rare medicinal plants found only in mountain ecosystems.",
+    duration:"16 min", plants:4,
+    steps:[1,8,11,5].map(id=>PLANTS.find(p=>p.id===id))
+  }
+];
+
+// ══════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════
+let bookmarks = JSON.parse(localStorage.getItem('vhg-bookmarks')||'[]');
+let notes     = JSON.parse(localStorage.getItem('vhg-notes')||'{}');
+let currentPlant = null;
+let currentTour  = null;
+let tourStep     = 0;
+
+// ══════════════════════════════════════════════
+//  NAVIGATION
+// ══════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-links a').forEach(a=>a.classList.remove('active'));
+  document.getElementById(id+'-page').classList.add('active');
+  const navEl = document.getElementById('nav-'+id);
+  if(navEl) navEl.classList.add('active');
+  if(id==='garden') renderPlants(PLANTS);
+  if(id==='tours') renderTours();
+  if(id==='bookmarks') renderBookmarks();
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════════
+//  PLANT CARDS
+// ══════════════════════════════════════════════
+function getCategoryTags(cats) {
+  const map = {
+    digest:'tag-digest Digestive',
+    immunity:'tag-immunity Immunity',
+    skin:'tag-skin Skin Care',
+    stress:'tag-stress Mind & Stress',
+    pain:'tag-pain Pain Relief',
+    respiratory:'tag-respiratory Respiratory',
+    general:'tag-general General'
+  };
+  return cats.map(c=>{ const[cls,label]=(map[c]||'tag-general '+c).split(' '); return `<span class="tag ${cls}">${label}</span>`; }).join('');
+}
+
+function plantCardHTML(plant) {
+  const bk = bookmarks.includes(plant.id);
+  return `
+    <div class="plant-card fade-up" onclick="openPlant(${plant.id})">
+      <div class="plant-card-img" style="background:${plant.color}">${plant.emoji}</div>
+      <div class="plant-card-body">
+        <div class="plant-card-name">${plant.name}</div>
+        <div class="plant-card-botanical">${plant.botanical}</div>
+        <div class="plant-card-tags">${getCategoryTags(plant.categories)}</div>
+        <div class="plant-card-desc">${plant.desc.substring(0,100)}…</div>
+        <div class="plant-card-actions">
+          <button class="btn-view" onclick="event.stopPropagation();openPlant(${plant.id})">View Details</button>
+          <button class="btn-bookmark ${bk?'active':''}" onclick="event.stopPropagation();toggleBookmark(${plant.id},this)" title="Bookmark">${bk?'🔖':'🤍'}</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function renderPlants(list) {
+  const grid = document.getElementById('plants-grid');
+  const info = document.getElementById('results-info');
+  grid.innerHTML = list.map(plantCardHTML).join('');
+  info.textContent = `Showing ${list.length} of ${PLANTS.length} plants`;
+}
+
+// ══════════════════════════════════════════════
+//  SEARCH & FILTER
+// ══════════════════════════════════════════════
+let activeChipCat = '';
+
+function setChip(el, cat) {
+  document.querySelectorAll('#filter-chips .chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  activeChipCat = cat;
+  document.getElementById('category-filter').value = cat;
+  filterPlants();
+}
+
+function filterPlants() {
+  const q       = document.getElementById('search-input').value.toLowerCase();
+  const cat     = activeChipCat || document.getElementById('category-filter').value;
+  const region  = document.getElementById('region-filter').value;
+  let list = PLANTS.filter(p=>{
+    const matchQ = !q ||
+      p.name.toLowerCase().includes(q)||
+      p.botanical.toLowerCase().includes(q)||
+      p.common.some(c=>c.toLowerCase().includes(q))||
+      p.uses.some(u=>u.toLowerCase().includes(q));
+    const matchC = !cat || p.categories.includes(cat);
+    const matchR = !region || p.region===region;
+    return matchQ && matchC && matchR;
+  });
+  renderPlants(list);
+}
+
+// ══════════════════════════════════════════════
+//  PLANT MODAL
+// ══════════════════════════════════════════════
+function openPlant(id) {
+  currentPlant = PLANTS.find(p=>p.id===id);
+  if(!currentPlant) return;
+  const p = currentPlant;
+  document.getElementById('modal-emoji').textContent = p.emoji;
+  document.getElementById('modal-name').textContent  = p.name;
+  document.getElementById('modal-botanical').textContent = p.botanical;
+  document.getElementById('modal-tags').innerHTML = getCategoryTags(p.categories);
+  document.getElementById('modal-about').textContent = p.about;
+  document.getElementById('modal-info-grid').innerHTML = `
+    <div class="info-card"><div class="info-card-label">Family</div><div class="info-card-value">${p.family}</div></div>
+    <div class="info-card"><div class="info-card-label">Ayurvedic Role</div><div class="info-card-value">${p.ayurvedicSystem}</div></div>
+    <div class="info-card"><div class="info-card-label">Taste (Rasa)</div><div class="info-card-value">${p.taste}</div></div>
+    <div class="info-card"><div class="info-card-label">Parts Used</div><div class="info-card-value">${p.part}</div></div>
+    <div class="info-card"><div class="info-card-label">Season</div><div class="info-card-value">${p.season}</div></div>
+    <div class="info-card"><div class="info-card-label">Region</div><div class="info-card-value">${p.region.charAt(0).toUpperCase()+p.region.slice(1)}</div></div>`;
+  document.getElementById('modal-uses-list').innerHTML = p.uses.map(u=>`<li>${u}</li>`).join('');
+  document.getElementById('modal-prep').textContent = p.prep;
+  document.getElementById('modal-compounds').textContent = p.compounds;
+  document.getElementById('modal-habitat').textContent = p.habitat;
+  document.getElementById('modal-cultivation').innerHTML = p.cultivation.map(c=>`<li>${c}</li>`).join('');
+  document.getElementById('notes-textarea').value = notes[p.id]||'';
+  const bk = bookmarks.includes(p.id);
+  document.getElementById('modal-bookmark-btn').textContent = bk ? '🔖' : '🤍';
+  // Reset tabs
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelector('.modal-tab').classList.add('active');
+  document.getElementById('tab-info').classList.add('active');
+  document.getElementById('plant-modal-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+
+function closeModal(e) {
+  if(e.target===document.getElementById('plant-modal-overlay')) closePlantModal();
+}
+function closePlantModal() {
+  document.getElementById('plant-modal-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+function switchTab(btn, tabId) {
+  document.querySelectorAll('.modal-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(tabId).classList.add('active');
+}
+
+// ══════════════════════════════════════════════
+//  BOOKMARKS
+// ══════════════════════════════════════════════
+function toggleBookmark(id, btn) {
+  const idx = bookmarks.indexOf(id);
+  if(idx>-1){ bookmarks.splice(idx,1); btn.textContent='🤍'; btn.classList.remove('active'); showToast('Bookmark removed'); }
+  else { bookmarks.push(id); btn.textContent='🔖'; btn.classList.add('active'); showToast('Plant bookmarked! 🔖'); }
+  localStorage.setItem('vhg-bookmarks', JSON.stringify(bookmarks));
+}
+function toggleModalBookmark() {
+  if(!currentPlant) return;
+  const id = currentPlant.id;
+  const idx = bookmarks.indexOf(id);
+  const btn = document.getElementById('modal-bookmark-btn');
+  if(idx>-1){ bookmarks.splice(idx,1); btn.textContent='🤍'; showToast('Bookmark removed'); }
+  else { bookmarks.push(id); btn.textContent='🔖'; showToast('Plant bookmarked! 🔖'); }
+  localStorage.setItem('vhg-bookmarks', JSON.stringify(bookmarks));
+}
+function renderBookmarks() {
+  const content = document.getElementById('bookmarks-content');
+  const empty   = document.getElementById('bookmarks-empty');
+  if(bookmarks.length===0){ content.style.display='none'; empty.style.display='flex'; return; }
+  empty.style.display='none'; content.style.display='grid';
+  const list = PLANTS.filter(p=>bookmarks.includes(p.id));
+  content.innerHTML = list.map(plantCardHTML).join('');
+}
+
+// ══════════════════════════════════════════════
+//  NOTES
+// ══════════════════════════════════════════════
+function saveNote() {
+  if(!currentPlant) return;
+  notes[currentPlant.id] = document.getElementById('notes-textarea').value;
+  localStorage.setItem('vhg-notes', JSON.stringify(notes));
+  showToast('Note saved! ✍️');
+}
+
+// ══════════════════════════════════════════════
+//  SHARE
+// ══════════════════════════════════════════════
+function shareModalPlant() { if(!currentPlant) return; shareWA(); }
+function shareWA() {
+  if(!currentPlant) return;
+  const txt = `🌿 Learn about ${currentPlant.name} (${currentPlant.botanical})!\n\n${currentPlant.desc}\n\nExplore more at Vanaspati — Virtual Herbal Garden 🌱`;
+  window.open(`https://wa.me/?text=${encodeURIComponent(txt)}`,'_blank');
+}
+function shareTW() {
+  if(!currentPlant) return;
+  const txt = `Exploring ${currentPlant.name} on Vanaspati Virtual Herbal Garden 🌿 #AYUSH #HerbalMedicine #Ayurveda`;
+  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(txt)}`,'_blank');
+}
+function copyLink() {
+  const url = window.location.href + (currentPlant ? `#plant-${currentPlant.id}` : '');
+  navigator.clipboard.writeText(url).then(()=>showToast('Link copied! 📋'));
+}
+
+// ══════════════════════════════════════════════
+//  TOURS
+// ══════════════════════════════════════════════
+function renderTours() {
+  document.getElementById('tours-grid').innerHTML = TOURS.map(t=>`
+    <div class="tour-card" onclick="startTour(${t.id})">
+      <div class="tour-card-header" style="background:${t.color}">${t.emoji}</div>
+      <div class="tour-card-body">
+        <div class="tour-card-theme">${t.theme}</div>
+        <div class="tour-card-name">${t.name}</div>
+        <div class="tour-card-desc">${t.desc}</div>
+        <div class="tour-meta"><span>⏱ ${t.duration}</span><span>🌿 ${t.plants} plants</span></div>
+        <button class="btn-start-tour">Start Tour →</button>
+      </div>
+    </div>`).join('');
+}
+
+function startTour(id) {
+  currentTour = TOURS.find(t=>t.id===id);
+  tourStep = 0;
+  document.getElementById('tour-modal').classList.add('open');
+  document.body.style.overflow='hidden';
+  renderTourStep();
+}
+function closeTour() {
+  document.getElementById('tour-modal').classList.remove('open');
+  document.body.style.overflow='';
+}
+function renderTourStep() {
+  const t = currentTour;
+  const p = t.steps[tourStep];
+  const total = t.steps.length;
+  document.getElementById('tour-theme-label').textContent = t.theme;
+  document.getElementById('tour-title-label').textContent = t.name;
+  document.getElementById('tour-progress').style.width = ((tourStep+1)/total*100)+'%';
+  document.getElementById('tour-step-num').textContent = `${tourStep+1} / ${total}`;
+  document.getElementById('tour-plant-emoji').textContent = p.emoji;
+  document.getElementById('tour-plant-name').textContent = p.name;
+  document.getElementById('tour-plant-botanical').textContent = p.botanical;
+  document.getElementById('tour-plant-desc').textContent = p.about.substring(0,280)+'…';
+  document.getElementById('tour-uses-pills').innerHTML = p.uses.slice(0,4).map(u=>`<span class="tour-use-pill">${u}</span>`).join('');
+  const dots = document.getElementById('tour-dots');
+  dots.innerHTML = t.steps.map((_,i)=>`<div class="tour-dot ${i===tourStep?'active':''}"></div>`).join('');
+  const nextBtn = document.getElementById('tour-next-btn');
+  nextBtn.textContent = tourStep===total-1 ? '🎉 Finish' : 'Next →';
+}
+function tourNav(dir) {
+  const total = currentTour.steps.length;
+  if(dir===1 && tourStep===total-1){ closeTour(); showToast('Tour completed! 🎉'); return; }
+  if(dir===-1 && tourStep===0) return;
+  tourStep += dir;
+  renderTourStep();
+}
+
+// ══════════════════════════════════════════════
+//  AI ASSISTANT
+// ══════════════════════════════════════════════
+let aiOpen = false;
+
+function toggleAI() {
+  aiOpen = !aiOpen;
+  document.getElementById('ai-panel').classList.toggle('open', aiOpen);
+}
+
+async function sendAI() {
+  const input = document.getElementById('ai-input');
+  const q = input.value.trim();
+  if(!q) return;
+  appendMsg(q,'user');
+  input.value='';
+  const typing = appendTyping();
+  try {
+    const plantContext = PLANTS.map(p=>`${p.name} (${p.botanical}): ${p.uses.slice(0,3).join(', ')}`).join('\n');
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:`You are Vanaspati, an expert AI guide for Ayurvedic medicinal plants and the AYUSH system of medicine. Answer questions about medicinal plants, herbs, traditional remedies, Ayurveda, and related topics. Be knowledgeable, warm, and educational. Keep responses concise (2-4 sentences unless more detail is needed). Use emojis sparingly for warmth. You have access to this garden's plant database:\n\n${plantContext}\n\nAlways remind users to consult healthcare professionals before using herbs medicinally.`,
+        messages:[{role:'user',content:q}]
+      })
+    });
+    const data = await resp.json();
+    typing.remove();
+    const text = data.content?.[0]?.text || "I'm sorry, I couldn't process that. Please try again!";
+    appendMsg(text,'bot');
+  } catch(e) {
+    typing.remove();
+    appendMsg("I'm having trouble connecting right now. Please try again in a moment! 🌿",'bot');
+  }
+}
+
+function appendMsg(text, role) {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  div.textContent = text;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+function appendTyping() {
+  const msgs = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = 'ai-msg bot ai-typing';
+  div.innerHTML = '<div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div>';
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+// ══════════════════════════════════════════════
+//  TOAST
+// ══════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+// ══════════════════════════════════════════════
+//  HERO 3D CANVAS (Three.js)
+// ══════════════════════════════════════════════
+function initHero3D() {
+  const canvas = document.getElementById('hero-canvas');
+  if(!canvas || typeof THREE==='undefined') return;
+  const renderer = new THREE.WebGLRenderer({canvas, alpha:true, antialias:true});
+  renderer.setPixelRatio(window.devicePixelRatio);
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  renderer.setSize(w, h);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(60, w/h, 0.1, 100);
+  camera.position.set(0,0,5);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+  scene.add(ambient);
+  const dirLight = new THREE.DirectionalLight(0xffd700, 0.8);
+  dirLight.position.set(5,5,5);
+  scene.add(dirLight);
+  const sphereGeo = new THREE.SphereGeometry(0.18, 16, 16);
+  const leafGeo = new THREE.SphereGeometry(0.22, 8, 8);
+  leafGeo.scale(1, 0.5, 0.3);
+  const leaves = [];
+  const colors = [0x4a7c59, 0x6fa67f, 0x2d5038, 0xa8d5a2, 0x8bc34a, 0x558b2f];
+  for(let i=0;i<30;i++){
+    const mat = new THREE.MeshPhongMaterial({color:colors[i%colors.length], shininess:60});
+    const geo = i%5===0 ? sphereGeo : leafGeo;
+    const mesh = new THREE.Mesh(geo, mat);
+    const theta = Math.random()*Math.PI*2;
+    const phi   = Math.random()*Math.PI;
+    const r     = 1.2 + Math.random()*1.5;
+    mesh.position.set(r*Math.sin(phi)*Math.cos(theta), r*Math.sin(phi)*Math.sin(theta), r*Math.cos(phi));
+    mesh.rotation.set(Math.random()*Math.PI, Math.random()*Math.PI, Math.random()*Math.PI);
+    mesh.userData = { speed: 0.003+Math.random()*0.005, phase: Math.random()*Math.PI*2 };
+    scene.add(mesh);
+    leaves.push(mesh);
+  }
+  const group = new THREE.Group();
+  const stemGeo = new THREE.CylinderGeometry(0.04,0.06,1.2,8);
+  const stemMat = new THREE.MeshPhongMaterial({color:0x6b4c2a});
+  group.add(new THREE.Mesh(stemGeo, stemMat));
+  for(let i=0;i<8;i++){
+    const lg = new THREE.SphereGeometry(0.15+Math.random()*0.1, 8, 8);
+    lg.scale(1, 0.35+Math.random()*0.2, 0.25);
+    const lm = new THREE.MeshPhongMaterial({color:colors[i%colors.length], shininess:40});
+    const lmesh = new THREE.Mesh(lg, lm);
+    const ang = (i/8)*Math.PI*2;
+    const h2  = -0.3 + (i/8)*0.8;
+    lmesh.position.set(Math.cos(ang)*0.4, h2, Math.sin(ang)*0.4);
+    lmesh.rotation.y = -ang;
+    group.add(lmesh);
+  }
+  scene.add(group);
+  let t2 = 0;
+  function animate() {
+    requestAnimationFrame(animate);
+    t2 += 0.01;
+    group.rotation.y = t2*0.4;
+    group.position.y = Math.sin(t2)*0.15;
+    leaves.forEach(l=>{
+      l.position.x += Math.sin(t2 + l.userData.phase)*0.002;
+      l.position.y += Math.cos(t2 * l.userData.speed * 100 + l.userData.phase)*0.002;
+      l.rotation.x += 0.003;
+      l.rotation.z += 0.002;
+    });
+    renderer.render(scene, camera);
+  }
+  animate();
+}
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', ()=>{
+  initHero3D();
+  document.getElementById('results-info').textContent = `Showing ${PLANTS.length} of ${PLANTS.length} plants`;
+});
+</script>
+</body>
+</html>
