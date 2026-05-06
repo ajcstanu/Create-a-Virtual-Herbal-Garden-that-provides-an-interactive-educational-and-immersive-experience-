@@ -285,13 +285,6 @@ The Virtual Herbal Garden aims to:
 
 ---
 
-# 👨‍💻 Contributors
-
-* Your Name
-* Team Members
-
----
-
 # 🙌 Acknowledgements
 
 Special thanks to:
