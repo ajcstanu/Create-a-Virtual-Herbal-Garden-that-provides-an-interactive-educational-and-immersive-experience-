@@ -6,7 +6,7 @@
 ![Flask](https://img.shields.io/badge/Flask-Web%20Framework-black)
 ![SQLite](https://img.shields.io/badge/Database-SQLite-green)
 ![AI](https://img.shields.io/badge/AI-Anthropic%20SDK-orange)
-![License](https://img.shields.io/badge/License-MIT-purple)
+
 
 ### 🪴 An Interactive AI-Powered Virtual Herbal Garden for AYUSH Medicinal Plants
 
